@@ -13,7 +13,7 @@ import * as express from "express";
 import * as jsonMarkup from "json-markup";
 import * as path from "path";
 
-import { JsonArray, TaJsonSerialize } from "@r2-lcp-js/serializable";
+import { TaJsonSerialize } from "@r2-lcp-js/serializable";
 import { OPDSLink } from "@r2-opds-js/opds/opds2/opds2-link";
 import { isHTTP } from "@r2-utils-js/_utils/http/UrlUtils";
 import { sortObject, traverseJsonObjects } from "@r2-utils-js/_utils/JsonUtils";
@@ -164,7 +164,6 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
 
                 const jsonObj = TaJsonSerialize(objToSerialize);
 
-                let validationStr: string | undefined;
                 const doValidate = !reqparams.jsonPath || reqparams.jsonPath === "all";
                 if (doValidate) {
 
@@ -197,7 +196,6 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                     const validationErrors =
                         jsonSchemaValidate(jsonSchemasRootpath, jsonSchemasNames, jsonObj);
                     if (validationErrors) {
-                        validationStr = "";
 
                         for (const err of validationErrors) {
 
@@ -223,23 +221,19 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                                 pubIndex = err.jsonPath.replace(/^publications\.([0-9]+).*/, "$1");
                                 debug(pubIndex);
                             }
-
-                            validationStr +=
-                            // tslint:disable-next-line:max-line-length
-                            `\n___________INDEX___________ #${pubIndex} "${title}"\n\n${err.ajvMessage}: ${valueStr}\n\n'${err.ajvDataPath?.replace(/^\./, "")}' (${err.ajvSchemaPath})\n\n`;
                         }
                     }
                 }
 
                 absolutizeURLs(jsonObj);
 
-                if (jsonObj.publications && (jsonObj.publications as JsonArray).length) {
-                    let i = 0;
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (jsonObj.publications as JsonArray).forEach((pub: any) => {
-                        pub.___________INDEX___________ = i++;
-                    });
-                }
+                //if (jsonObj.publications && (jsonObj.publications as JsonArray).length) {
+                //    let i = 0;
+                //    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                //    (jsonObj.publications as JsonArray).forEach((pub: any) => {
+                //        pub.___________INDEX___________ = i++;
+                //    });
+                //}
 
                 // const jsonStr = global.JSON.stringify(jsonObj, null, "    ");
 
@@ -257,7 +251,7 @@ export function serverOPDS_local_feed(server: Server, topRouter: express.Applica
                     "<h1>OPDS2 JSON feed</h1>" +
                     "<hr><p><pre>" + jsonPretty + "</pre></p>" +
                     // tslint:disable-next-line:max-line-length
-                    (doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
+                    //(doValidate ? (validationStr ? ("<hr><p><pre>" + validationStr + "</pre></p>") : ("<hr><p>JSON SCHEMA OK.</p>")) : "") +
                     // "<hr><p><pre>" + jsonStr + "</pre></p>" +
                     // "<p><pre>" + dumpStr + "</pre></p>" +
                     "</body></html>");
